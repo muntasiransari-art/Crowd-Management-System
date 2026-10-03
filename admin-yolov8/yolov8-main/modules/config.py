@@ -68,17 +68,19 @@ def add_alert(alert_type, message, severity="warning"):
     from datetime import datetime
     import time
     with alert_lock:
+        now_str = datetime.now().strftime("%H:%M:%S")
         alert_event = {
             "id": int(time.time() * 1000),
-            "timestamp": datetime.now().strftime("%H:%M:%S"),
+            "timestamp": now_str,
+            "time": now_str,
             "type": alert_type,
             "message": message,
             "severity": severity  # "critical", "warning", "info"
         }
-        # Avoid duplicate alerts of same type within 3 seconds
+        # Avoid duplicate alerts of exact same type within 4 seconds
         if alert_history:
             last = alert_history[0]
-            if last["type"] == alert_type and (time.time() * 1000 - last["id"]) < 3000:
+            if last["type"] == alert_type and (time.time() * 1000 - last["id"]) < 4000:
                 return
         alert_history.insert(0, alert_event)
         if len(alert_history) > 50:

@@ -194,17 +194,26 @@ def generate_crowd_frame():
         config.average_speed = movement_summary["average_speed"]
         config.movement_breakdown = movement_summary["directions"]
 
-        # Weapon detection status
+        # Weapon detection status & logging
         has_weapon = len(detected_weapons) > 0 or config.simulated_weapon_alert
         config.weapon_detected = has_weapon
         if has_weapon:
-            config.add_alert("Weapon Detected", "Potential weapon or weapon-like object detected!", severity="critical")
+            weapon_names = ", ".join([w[4].upper() for w in detected_weapons]) if detected_weapons else "SIMULATED WEAPON THREAT"
+            config.add_alert(
+                "WEAPON DETECTED",
+                f"CRITICAL THREAT: Weapon detected ({weapon_names}) in live camera feed!",
+                severity="critical"
+            )
 
-        # Overcrowding status
+        # Overcrowding status & logging
         is_overcrowded = config.crowd_count >= config.overcrowding_threshold or config.simulated_overcrowding_alert
         config.overcrowding_alert = is_overcrowded
         if is_overcrowded:
-            config.add_alert("Overcrowding Anomaly", f"Density threshold exceeded: {config.crowd_count} people in zone.", severity="critical" if config.crowd_count > config.overcrowding_threshold * 1.3 else "warning")
+            config.add_alert(
+                "ATTENDEE LIMIT EXCEEDED",
+                f"CROWD ALERT: Current count ({config.crowd_count}) EXCEEDS safety limit threshold ({config.overcrowding_threshold})!",
+                severity="critical" if config.crowd_count > config.overcrowding_threshold * 1.3 else "warning"
+            )
 
         # Draw overlays
         # 1. Monitoring ROI Area
